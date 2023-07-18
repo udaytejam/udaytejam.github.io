@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Flashcard Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 10px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .flashcard {
+      width: 45%;
+      height: 200px;
+      background-color: white;
+      border: 1px solid #a8a4a4;
+      padding: 10px;
+      margin: 5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      page-break-inside: avoid;
+    }
+    .front {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .back {
+      font-size: 18px;
+    }
+    .page {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      page-break-after: always;
+    }
+    .column {
+      flex-basis: 49%;
+    }
+    #generatepdf {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Flashcard Generator</h1>
+  <form id="flashcardForm">
+    <h2>Card Values</h2>
+    <div id="cardValues">
+      <!-- all card inputs will be added dynamically here -->
+    </div>
+    <button type="button" onclick="addCardValueInput()">Add Card</button>
+    <br>
+    <button type="button" id="generatepdf" onclick="generatePDF()">Generate PDF</button>
+  </form>
+
+  <script>
+    function generatePDF() {
+  var frontValues = [];
+  var backValues = [];
+
+  // Get all front values
+  var frontInputs = document.querySelectorAll(".frontValue");
+  frontInputs.forEach(function(input) {
+    frontValues.push(input.value);
+  });
+
+  // Get all back values
+  var backInputs = document.querySelectorAll(".backValue");
+  backInputs.forEach(function(input) {
+    backValues.push(input.value);
+  });
+
+  // Adjust backValues if it has an odd length
+  if (backValues.length % 2 !== 0) {
+    backValues.push('---');
+  }
+
+  // Swap backValues in pairs
+  for (var i = 0; i < backValues.length; i += 2) {
+    var temp = backValues[i];
+    backValues[i] = backValues[i + 1];
+    backValues[i + 1] = temp;
+  }
+
+  // Create a new window for printing
+  var printWindow = window.open("", "_blank");
+
+  // Generate the PDF content
+  var pdfContent = `<html>
+                      <head>
+                        <title>Flashcard PDF</title>
+                        <style>
+                          body {
+                            font-family: Arial, sans-serif;
+                            margin: 0;
+                          }
+                          .flashcard {
+                            width: 45%;
+                            height: 200px;
+                            background-color: white;
+                            border: 1px solid #a8a4a4;
+                            padding: 10px;
+                            margin: 5px;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: left;
+                            align-items: left;
+                            text-align: left;
+                            page-break-inside: avoid;
+                          }
+                          .front {
+                            font-size: 24px;
+                            font-weight: bold;
+                          }
+                          .back {
+                            font-size: 18px;
+                          }
+                          .page {
+                            display: flex;
+                            flex-wrap: wrap;
+                            justify-content: space-between;
+                            page-break-after: always;
+                          }
+                          .column {
+                            flex-basis: 49%;
+                          }
+                        </style>
+                      </head>
+                      <body>`;
+
+  // Generate the front page content
+  pdfContent += `<div class="page">`;
+  for (var i = 0; i < frontValues.length; i++) {
+    pdfContent += `<div class="flashcard">
+                    <div class="front">${frontValues[i]}</div>
+                  </div>`;
+  }
+  pdfContent += `</div>`;
+
+  // Generate the back page content
+  pdfContent += `<div class="page">`;
+  for (var i = 0; i < backValues.length; i++) {
+    pdfContent += `<div class="flashcard">
+                    <div class="back">${backValues[i]}</div>
+                  </div>`;
+  }
+  pdfContent += `</div>`;
+
+  pdfContent += `</body>
+                  </html>`;
+
+  // Write the PDF content to the new window
+  printWindow.document.open();
+  printWindow.document.write(pdfContent);
+  printWindow.document.close();
+
+  // Print the window
+  printWindow.print();
+}
+
+    function addFrontValueInput() {
+      var frontValuesDiv = document.getElementById("cardValues");
+      var input = document.createElement("input");
+      input.type = "text";
+      input.className = "frontValue";
+      input.required = true;
+      input.placeholder = 'Front';
+      input.style.width = '45%';
+      input.style.margin = '5px';
+      frontValuesDiv.appendChild(input);
+    }
+
+    function addBackValueInput() {
+      var backValuesDiv = document.getElementById("cardValues");
+      var input = document.createElement("input");
+      input.type = "text";
+      input.className = "backValue";
+      input.required = true;
+      input.placeholder = 'Back';
+      input.style.width = '45%';
+      input.style.margin = '5px';
+      backValuesDiv.appendChild(input);
+    }
+
+    function addCardValueInput() {
+      addFrontValueInput();
+      addBackValueInput();
+    }
+
+    // Add initial input fields
+    // for (var i = 0; i < 8; i++) {
+    //   addFrontValueInput();
+    //   addBackValueInput();
+    // }
+  </script>
+</body>
+</html>
